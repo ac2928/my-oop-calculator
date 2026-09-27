@@ -79,3 +79,21 @@ def test_polymorphism_with_three():
     for calculation in calculations:
         results.append(calculation.get_result())
     assert results == [10, -7, 7]
+
+
+
+
+def test_decimal_addition():
+    assert Add(0.1, 0.2).get_result() == pytest.approx(0.3)
+
+
+def test_decimal_subtraction():
+    assert Subtract(1.5, 0.25).get_result() == 1.25
+
+
+def test_subtract_two_negative_operands():
+    assert Subtract(-10, -5).get_result() == -5
+
+
+def test_subtract_zero_operands():
+    assert Subtract(0, 0).get_result() == 0
