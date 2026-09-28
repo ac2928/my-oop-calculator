@@ -32,7 +32,7 @@ This runs every test and fails if line or branch coverage drops below 100%.
 
 - History uses an internal list (_calculations) which can only be manipulated by the add and remove methods. get_history() returns a copy so external code can’t accidentally change or reorder the internal list.
 
-- Prior to passing control to history.add(), both the two values and the result are verified as finite. Failed operations are not stored. Invalid data results in a message and return to the loop rather than in an exception.
+- Prior to passing control to history.add(), both the two values and the result are verified as finite. Failed operations are not stored. Invalid data results in a message and return to the loop rather than crashing.
 
 ## Reflection
 
@@ -48,7 +48,7 @@ The concepts would move over including encapsulation, inheritance, polymorphism,
 ## Notes
 
 **One confusing instruction and how I'd improve it:**
-The exercise instructed to rename entrypoint.py to `calculator/__main__.py`. I originally missnamed the file and received the error, No module named `calculator.__main__`. I would document the requirement for two underscores on either side of the name and also reference this error to aid the student in understanding its significance.
+The exercise instructed to type entrypoint.py into `calculator/__main__.py`. I originally misnamed the file and received the error, No module named `calculator.__main__`. I would document the requirement for two underscores on either side of the name and also reference this error to aid the student in understanding its significance.
 
 **If tests pass but coverage fails:**
 I would read the Missing column of the coverage report to determine which lines or branches were not executed. I would then determine user actions that would cause these lines or branches to be executed and write a test that verifies this behavior. I would not remove lines of code or delete functionality in order to increase the coverage percentage.
