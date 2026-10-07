@@ -1,29 +1,19 @@
-"""A shared calculation contract and its concrete implementations."""
+"""Store two operands and a callable; run math only in get_result."""
 
-from abc import ABC, abstractmethod
+from math import isfinite
 
-
-class Calculation(ABC):
-    """Store two operands and require subclasses to provide a result."""
-
-    def __init__(self, a: float, b: float) -> None:
-        self.a = a
-        self.b = b
-
-    @abstractmethod
-    def get_result(self) -> float:
-        """Return the result of this calculation."""
+from calculator.validation import numeric_values
 
 
-class Add(Calculation):
-    """Add the two operands."""
+class Calculation:
+    def __init__(self, a, b, operation):
+        numbers = numeric_values([a, b])
+        self.a = numbers[0]
+        self.b = numbers[1]
+        self.operation = operation
 
-    def get_result(self) -> float:
-        return self.a + self.b
-
-
-class Subtract(Calculation):
-    """Subtract the second operand from the first."""
-
-    def get_result(self) -> float:
-        return self.a - self.b
+    def get_result(self):
+        result = float(self.operation(self.a, self.b))
+        if not isfinite(result):
+            raise ValueError("Result is outside the supported range.")
+        return result

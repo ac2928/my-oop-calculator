@@ -172,3 +172,22 @@ def test_invalid_removals_before_successful_removal(monkeypatch, capsys):
     assert "Please enter a whole calculation number." in output
     assert "Removed: Add: 14, 6 = 20" in output
     assert "No calculations in history." in output
+
+
+    # Part 1: new operations through the same CLI
+
+def test_multiply_and_divide_session(monkeypatch, capsys):
+    output = session(monkeypatch, capsys,
+                     ["multiply", "2", "3", "divide", "7", "2", "history", "exit"])
+    assert "Result: 6" in output
+    assert "Result: 3.5" in output
+    assert "1. Multiply: 2, 3 = 6" in output
+    assert "2. Divide: 7, 2 = 3.5" in output
+
+
+def test_divide_by_zero_recovers_without_history(monkeypatch, capsys):
+    output = session(monkeypatch, capsys,
+                     ["divide", "1", "0", "history", "add", "2", "3", "exit"])
+    assert "Cannot divide by zero." in output
+    assert "No calculations in history." in output
+    assert "Result: 5" in output
