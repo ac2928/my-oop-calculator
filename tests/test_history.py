@@ -8,11 +8,11 @@ from calculator.operations import Operations
 
 
 def add(a, b):
-    return Calculation(a, b, Operations.add)
+    return Calculation((a, b), Operations.add)
 
 
 def subtract(a, b):
-    return Calculation(a, b, Operations.subtract)
+    return Calculation((a, b), Operations.subtract)
 
 
 def test_empty_history():

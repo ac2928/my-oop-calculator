@@ -22,7 +22,7 @@ def describe(calculation: Calculation, result: float) -> str:
     """Format a calculation and its saved result (no math is rerun)."""
     return (
         f"{calculation.operation.__name__.capitalize()}: "
-        f"{calculation.a:g}, {calculation.b:g} = {result:g}"
+        f"{', '.join(f'{value:g}' for value in calculation.values)} = {result:g}"
     )
 
 
@@ -45,6 +45,11 @@ def read_number(prompt: str) -> float:
     return number
 
 
+# This prompt-per-number CLI asks for exactly two numbers, so it offers only
+# the two-value operations. Part 4 replaces it with one-line requests.
+TWO_VALUE_COMMANDS = {"add", "subtract", "multiply", "divide"}
+
+
 def run() -> None:
     """Run one independent calculator session."""
     history = History()
@@ -54,7 +59,7 @@ def run() -> None:
             command = input("> ").strip().lower()
             if command == "exit":
                 break
-            if command in CalculationFactory.operations:
+            if command in TWO_VALUE_COMMANDS:
                 try:
                     a = read_number("First number: ")
                     b = read_number("Second number: ")
