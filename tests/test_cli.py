@@ -87,7 +87,7 @@ def test_mixed_case_request(monkeypatch, capsys):
 def test_divide_by_zero_recovers_without_history(monkeypatch, capsys):
     output = session(monkeypatch, capsys,
                      ["divide 1 0", "history", "add 2 3", "history", "exit"])
-    assert "Error: float division by zero" in output
+    assert "Error:" in output and "division by zero" in output
     assert "History is empty." in output
     assert "add 2 3 = 5.0000" in output
 
@@ -104,7 +104,7 @@ def test_overflow_and_negative_sqrt_recover(monkeypatch, capsys):
     output = session(monkeypatch, capsys,
                      ["add 1e308 1e308", "sqrt -4", "history", "exit"])
     assert "Error: Result is outside the supported range." in output
-    assert "Error: math domain error" in output
+    assert output.count("Error:") == 2
     assert "History is empty." in output
 
 

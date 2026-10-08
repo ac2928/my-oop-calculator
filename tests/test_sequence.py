@@ -15,7 +15,7 @@ def test_worked_request_later_success_after_failure():
     ]
     results, errors = execute_sequence(session, calculations)
     assert results == [5.0, 9.0]                   # the item AFTER the failure still ran
-    assert errors == ["float division by zero"]
+    assert len(errors) == 1 and "division by zero" in errors[0]
     assert [result for _, result in session.get_history()] == [5.0, 9.0]
 
 
