@@ -90,3 +90,45 @@ DataFrame (pd.read_csv reads the table) -> Series (frame["value"]) -> list (.tol
 Because they are separate, adding a new source (the CSV) didn't change the math, and the math can be tested without any files.
 
 **EAFP vs. LBYL:** EAFP for number conversion and opening the file: just try it, and Python reports a clear error (I don't check that the file exists first, since it could still fail when read). LBYL for this app's own rules: the minimum number of values and the required value column are checked explicitly.
+
+
+
+## Part 6: Integrate, explain, and adapt
+
+**Whole flow: a successful power request (power 3 exponent=4)**
+- Construction: the CLI's prepare_command splits the line into the name power, the value 3, and the setting exponent=4. The factory checks power takes exactly 1 value and allows exponent, then builds a Calculation holding (3.0,), Operations.power, and {"exponent": 4.0}. It is wrapped in a CalculateCommand. No math has run.
+- Execution: the CLI calls execute(), which calls session.calculate(), which calls get_result(). That runs Operations.power(3.0, exponent=4.0) = 81.0.
+- State change: the session saves (calculation, 81.0) in History.
+- Display: execute() returns "Result: 81.0000" and the CLI prints it.
+
+**Whole flow: a failed division (divide 1 0)**
+- Construction succeeds: the factory builds the Calculation and the CalculateCommand normally.
+- Execution fails: get_result() runs 1 / 0, which raises ZeroDivisionError.
+- State change: none in History. The session adds 1 to its failure count and lets the error continue upward. history.add is skipped.
+- Error handling: the CLI's except block prints the error, and because that try/except is inside the loop, the next prompt appears.
+
+**From Add subclass to stored static callable:** Before, Add was a Calculation subclass that overrode get_result() (inheritance: Add is a Calculation). Now there is one Calculation class that stores which function to use, such as Operations.add (composition: Calculation has an operation). A new operation is now one static method and one dictionary entry, not a new class.
+
+**Factory vs. Command:** The factory builds a Calculation, a math request; it chooses and checks but never runs anything. A Command is an application action (calculate, history, summary, clear, help) with execute() returning text. They do different jobs, so the factory is not a command.
+
+**History copy: protection and limit:** get_history() returns a copy of the list, so clearing or adding to that copy cannot change the real history. The limit: it is a shallow copy, so the Calculation objects inside are still the same shared objects.
+
+**6B: running a sequence:** execute_sequence(session, calculations) runs already-built calculations one at a time. The try is inside the loop, so one failure only affects that item, and else adds a result only after success. Saving still happens only in session.calculate. Worked request add 2 3, divide 1 0, square 3 gives results [5.0, 9.0], one error, and two history entries; my test checks the item after the failure still ran.
+
+**6C: my adaptation, a summary action**
+Requirement: report how many calculations succeeded and how many failed.
+Decisions I made before coding:
+- Successes are counted from saved history, so there is no second counter that could drift.
+- Failures are counted in CalculatorSession.calculate: if get_result() raises, the session adds 1 and re-raises, so callers still see the error and History is untouched.
+- A failure means a calculation that was built but failed while running (divide by zero, negative sqrt, overflow). Requests rejected before a Calculation exists (bad number, unknown name, wrong count) are not counted, because they never reach the session.
+- clear resets both counts, because clear means starting the session over.
+What changed: session.py, commands.py (SummaryCommand and help text), and one entry in the CLI's action table. Untouched: Operations, Calculation, the factory, History, statistics, and the CSV reader, which shows the new requirement fit the existing design.
+
+**What I reused vs. changed:** I reused my Part 1 validation, the Calculation class, the factory, and the teacher's supplied prepare_command parser. I changed the session to count failures and added a new command, and I wrote my own tests for the new behavior.
+
+**Evidence:** python -m pytest runs all 126 tests and enforces 100% line and branch coverage. GitHub Actions runs the same suite on Python 3.11 to 3.14; the run for my final commit passed on all four.
+
+**Limitations of my evidence:**
+- My first Part 6 push failed CI only on Python 3.14, because three tests checked Python's exact error wording ("float division by zero", "math domain error"), and 3.14 changed those messages. My code was correct; the tests were too strict. I changed them to check for the error itself, not the exact wording.
+- The tests cover the failure types I expected (ValueError, ZeroDivisionError, OverflowError). If an operation had a bug that raised a different error, such as TypeError, the session would count it, but the CLI would not catch it and the program would stop.
+- 100% coverage shows every line ran during the tests, not that every possible input is handled correctly.
