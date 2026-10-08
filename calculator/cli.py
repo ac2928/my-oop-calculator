@@ -1,9 +1,12 @@
 """CLI prepares requests, invokes commands, and recovers from expected failures."""
 
+import pandas as pd
+
 from calculator.commands import (
     CalculateCommand, ClearHistoryCommand, HelpCommand, HistoryCommand,
 )
 from calculator.factory import CalculationFactory
+from calculator.inputs import read_csv_values
 from calculator.session import CalculatorSession
 
 
@@ -33,6 +36,15 @@ def prepare_command(text, session):
             options[key] = value
         else:
             values.append(argument)
+    if name == "csv":
+        # A file is only another source of values, not an operation.
+        if len(values) != 2:
+            raise ValueError("Use: csv mean/stddev PATH (a path without spaces).")
+        operation, path = values
+        if operation.lower() not in {"mean", "stddev"}:
+            raise ValueError("CSV supports mean or stddev.")
+        values = read_csv_values(path)
+        name = operation
     calculation = CalculationFactory.create(name, *values, **options)
     return CalculateCommand(session, calculation)
 
@@ -52,6 +64,7 @@ def run() -> None:
         except (EOFError, KeyboardInterrupt):
             print()
             break
-        except (ValueError, ZeroDivisionError, OverflowError) as error:
+        except (ValueError, OSError, ZeroDivisionError, OverflowError,
+                pd.errors.ParserError, pd.errors.EmptyDataError) as error:
             print(f"Error: {error}")
     print("Goodbye!")

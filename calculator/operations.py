@@ -2,6 +2,8 @@
 
 from math import pow, sqrt
 
+from calculator.statistics import mean, standard_deviation
+
 
 class Operations:
     @staticmethod
@@ -40,3 +42,11 @@ class Operations:
     def power(value, *, exponent=2):
         # The bare * makes exponent keyword-only: power(3, exponent=4).
         return pow(value, exponent)
+
+    @staticmethod
+    def mean(*values):
+        return mean(values)
+
+    @staticmethod
+    def stddev(*values, ddof=1):
+        return standard_deviation(values, ddof=ddof)

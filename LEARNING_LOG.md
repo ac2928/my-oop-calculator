@@ -64,3 +64,29 @@ CLI reads "add 2 3" -> prepare_command splits it into add, 2, 3 -> factory looks
 
 **Trace: divide 1 0 (failure)**
 The factory builds the
+
+
+
+## Part 5: Statistics and another input source
+
+**What changed:** statistics.py adds mean and standard_deviation using pandas. Operations.mean and Operations.stddev hand off to them, and the factory registers both (stddev accepts ddof as a setting). inputs.py reads the value column from a CSV. The CLI's csv mean/stddev PATH request reads the file, then builds an ordinary CalculateCommand through the same factory.
+
+**Policy (from 2, 4, 6):** mean is 4. Squared deviations total 8. Sample deviation (ddof=1, the default) divides by n-1 = 2, so 4, and its square root is 2. Population deviation (ddof=0) divides by n = 3, about 1.6330. This app's rules: mean needs at least 1 value; stddev needs at least 2 for both settings; ddof must be 0 or 1.
+
+**Predictions:** Three identical values (7, 7, 7): mean is 7 and deviation is 0. A single value (5): mean works (5), but stddev is rejected because it needs at least two.
+
+**Validate before pandas:** pandas quietly skips missing values, which could change an answer without warning. So values go through numeric_values first, and a missing or bad value is rejected, not dropped. A quoted empty cell in a CSV becomes a missing value and fails this check; completely blank lines are skipped by pandas, which is fine.
+
+**The path a CSV request takes:**
+DataFrame (pd.read_csv reads the table) -> Series (frame["value"]) -> list (.tolist()) -> numeric tuple (Calculation runs numeric_values) -> stored operation (Calculation holds Operations.mean and the tuple; nothing runs yet) -> result (get_result() calls pandas and returns a float).
+
+**Same answer from either source:** stddev 10 20 30 40 50 and csv stddev values.csv both give 15.8114, because after reading, both go through the same factory, checks, and math. My test test_csv_and_typed_values_match proves this with a second dataset.
+
+**Why each part has its own home:**
+- Math (statistics.py, Operations) only calculates; it doesn't know where the numbers came from.
+- File reading (inputs.py) only gets the numbers out of the file; it does no math. A file is a source, not an operation.
+- Construction (the factory) checks names, counts, and settings and builds the calculation.
+- Display (commands and the CLI) turns results into text and handles errors.
+Because they are separate, adding a new source (the CSV) didn't change the math, and the math can be tested without any files.
+
+**EAFP vs. LBYL:** EAFP for number conversion and opening the file: just try it, and Python reports a clear error (I don't check that the file exists first, since it could still fail when read). LBYL for this app's own rules: the minimum number of values and the required value column are checked explicitly.

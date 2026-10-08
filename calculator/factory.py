@@ -15,10 +15,13 @@ class CalculationFactory:
         "sqrt": Operations.sqrt,
         "power": Operations.power,
         "sum": Operations.sum,
+        "mean": Operations.mean,
+        "stddev": Operations.stddev,
     }
 
     # How many values each fixed-size operation needs.
-    # sum is not listed: it accepts one or more and checks that itself.
+    # sum, mean, and stddev are not listed: they take many values and
+    # check their own minimum.
     operand_counts = {
         "add": 2,
         "subtract": 2,
@@ -32,6 +35,7 @@ class CalculationFactory:
     # Which named settings each operation accepts.
     allowed_options = {
         "power": {"exponent"},
+        "stddev": {"ddof"},
     }
 
     @staticmethod
