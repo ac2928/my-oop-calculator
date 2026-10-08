@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 HELP = (
     "Commands: add/subtract/multiply/divide A B; square/sqrt VALUE; "
     "power VALUE exponent=N; sum/mean/stddev VALUES (stddev ddof=0/1); "
-    "csv mean/stddev PATH; history; clear; help; exit"
+    "csv mean/stddev PATH; history; summary; clear; help; exit"
 )
 
 
@@ -38,6 +38,18 @@ class HistoryCommand(Command):
             request = " ".join(part for part in (calculation.operation.__name__, values, options) if part)
             lines.append(f"{request} = {result:.4f}")   # saved result: no math is rerun
         return "\n".join(lines) or "History is empty."
+
+
+class SummaryCommand(Command):
+    """Report how many calculations succeeded and how many failed."""
+
+    def __init__(self, session):
+        self.session = session
+
+    def execute(self) -> str:
+        successes = len(self.session.get_history())   # counted from saved history
+        failures = self.session.failure_count()       # counted separately by the session
+        return f"Successful: {successes}, Failed: {failures}"
 
 
 class ClearHistoryCommand(Command):

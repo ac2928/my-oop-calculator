@@ -3,7 +3,7 @@
 import pandas as pd
 
 from calculator.commands import (
-    CalculateCommand, ClearHistoryCommand, HelpCommand, HistoryCommand,
+    CalculateCommand, ClearHistoryCommand, HelpCommand, HistoryCommand, SummaryCommand,
 )
 from calculator.factory import CalculationFactory
 from calculator.inputs import read_csv_values
@@ -17,7 +17,11 @@ def prepare_command(text, session):
         raise ValueError("Enter a command; use help for examples.")
     name, *arguments = parts
     name = name.lower()
-    actions = {"history": HistoryCommand, "clear": ClearHistoryCommand}
+    actions = {
+        "history": HistoryCommand,
+        "clear": ClearHistoryCommand,
+        "summary": SummaryCommand,
+    }
     if name in actions:
         if arguments:
             raise ValueError(f"{name} does not accept values.")
