@@ -50,3 +50,17 @@
 **Errors during execution, not creation:** sqrt(-4) builds fine and only fails when get_result() runs, the same as dividing by zero.
 
 **Note on the CLI:** The CLI still asks for two numbers one at a time, so for now it only offers add, subtract, multiply, and divide. The one-line CLI comes in Part 4.
+
+
+
+## Part 4: Turn application actions into commands
+
+**What changed:** A new CalculatorSession (session.py) does the math and saves only successful results. A new commands.py has an abstract Command with execute() -> str, and four actions: CalculateCommand, HistoryCommand, ClearHistoryCommand, HelpCommand. The CLI now reads one line per request (like add 2 3 or power 3 exponent=4), uses the supplied prepare_command to build a command, prints what execute() returns, and repeats. The old remove action was replaced by clear.
+
+**Roles:** The session is the receiver (it does the work). The CLI is the invoker (it calls execute()). The factory still only builds calculations; it is not a command.
+
+**Trace: add 2 3 (success)**
+CLI reads "add 2 3" -> prepare_command splits it into add, 2, 3 -> factory looks up add and builds a Calculation holding (2.0, 3.0) -> wrapped in a CalculateCommand (no math yet) -> CLI calls execute() -> session.calculate() -> get_result() -> Operations.add(2.0, 3.0) = 5.0 -> session saves (calculation, 5.0) in history -> execute() returns "Result: 5.0000" -> CLI prints it.
+
+**Trace: divide 1 0 (failure)**
+The factory builds the
