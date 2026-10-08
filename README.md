@@ -1,6 +1,6 @@
 # OOP Calculator
 
-A command-line calculator built with object-oriented Python. It supports add, subtract, history, remove, help, and exit.
+A command-line calculator built with object-oriented Python, extended with a calculation factory, command objects, pandas statistics, and CSV input. Type one request per line, for example: add 2 3, power 3 exponent=4, mean 2 4 6, stddev 10 20 30 40 50, csv mean values.csv, history, summary, clear, help, exit. See LEARNING_LOG.md for design explanations for each part.
 
 ## Installation
 
@@ -25,6 +25,8 @@ Type help to see the available commands.
 This runs every test and fails if line or branch coverage drops below 100%.
 
 ## Design choices
+
+These notes describe the original calculator. See LEARNING_LOG.md for how the design changed in each part of this extension.
 
 - Calculation is an abstract parent that holds two values. Add and Subtract reuse this, but override get_result() to provide their own implementation. The duplicated `__init__` code has been eliminated.
 
