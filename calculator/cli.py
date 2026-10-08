@@ -3,8 +3,8 @@
 from math import isfinite
 
 from calculator.calculation import Calculation
+from calculator.factory import CalculationFactory
 from calculator.history import History
-from calculator.operations import Operations
 
 
 HELP = """Commands:
@@ -48,23 +48,17 @@ def read_number(prompt: str) -> float:
 def run() -> None:
     """Run one independent calculator session."""
     history = History()
-    operations = {
-        "add": Operations.add,
-        "subtract": Operations.subtract,
-        "multiply": Operations.multiply,
-        "divide": Operations.divide,
-    }
     print('OOP Calculator\n\nType "help" for commands.')
     while True:
         try:
             command = input("> ").strip().lower()
             if command == "exit":
                 break
-            if command in operations:
+            if command in CalculationFactory.operations:
                 try:
                     a = read_number("First number: ")
                     b = read_number("Second number: ")
-                    calculation = Calculation(a, b, operations[command])
+                    calculation = CalculationFactory.create(command, a, b)
                     result = calculation.get_result()
                 except ValueError:
                     print("Invalid number or result. Please use finite numbers.")
